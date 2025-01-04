@@ -50,7 +50,7 @@ public:
     int soundEnabled = 1;
     int wifiAtStartup = 0;
 
-    Credential webUI = {"admin", "bruce"};
+    Credential webUI = {"admin", "benestinkt"};
     WiFiCredential wifiAp = {"BruceNet", "brucenet"};
     std::map<String, String> wifi = {};
 

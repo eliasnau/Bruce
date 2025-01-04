@@ -119,11 +119,11 @@ void checkReboot() {
         {
             // Display poweroff bar only if holding button
             if (millis() - time_count > 500) {
-                tft.setCursor(60, 12);
+                tft.setCursor(62, 12);
                 tft.setTextSize(1);
-                tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
-                countDown = (millis() - time_count) / 1000 + 1;
-                tft.printf(" PWR OFF IN %d/3\n", countDown);
+                tft.setTextColor(TFT_RED, bruceConfig.bgColor);
+                countDown = 4 - ((millis() - time_count) / 1000 + 1);
+                tft.printf(" PWR OFF IN %d\n", countDown);
                 delay(10);
             }
         }

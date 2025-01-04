@@ -1,4 +1,3 @@
-
 #include <WiFi.h>
 #include <WebServer.h>
 #include <SD.h>
@@ -714,39 +713,215 @@ const char index_html[] PROGMEM = R"rawliteral(
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #ad007b;
+      --primary-dark: #8a0062;
+      --bg: #1a1a1a;
+      --surface: #2d2d2d;
+      --text: #ffffff;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      background: var(--surface);
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    h1 {
+      margin: 0;
+      background: linear-gradient(45deg, var(--primary), #ff0095);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 2.5em;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .stat-card {
+      background: var(--surface);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid rgba(173, 0, 123, 0.2);
+    }
+    
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    .file-explorer {
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .file-list {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .file-item {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .file-item:hover {
+      background: rgba(173, 0, 123, 0.1);
+    }
+    
+    .file-icon {
+      margin-right: 10px;
+      color: var(--primary);
+    }
+    
+    .file-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .action-button {
+      background: transparent;
+      color: var(--text);
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+    
+    .action-button:hover {
+      background: rgba(173, 0, 123, 0.2);
+    }
+    
+    .drop-area {
+      border: 2px dashed var(--primary);
+      border-radius: 10px;
+      padding: 40px;
+      text-align: center;
+      margin: 20px 0;
+      transition: all 0.3s;
+      background: var(--surface);
+    }
+    
+    .drop-area.highlight {
+      background: rgba(173, 0, 123, 0.1);
+      border-color: #ff0095;
+    }
+    
+    .drop-area i {
+      font-size: 48px;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+    
+    #status {
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      background: var(--surface);
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <div class="float-element"><a onclick="logoutButton()" href='javascript:void(0);'>[X]</a></div>
-    <h1 align="center">BRUCE Firmware</h1>
-    <p>Firmware for offensive pranks and pentest studies and analysis. For educational purposes only. Don't use in environments where you are not allowed. All responsibilities for irresponsible usage of this firmware rest on your fin, sharky. Sincerely, Bruce.</p>
-    <p>Firmware version: %FIRMWARE%</p>
-    <p>SD Free Storage: <span id="freeSD">%FREESD%</span> | Used: <span id="usedSD">%USEDSD%</span> | Total: <span id="totalSD">%TOTALSD%</span></p>
-    <p>LittleFS Free Storage: <span id="freeSD">%FREELittleFS%</span> | Used: <span id="usedSD">%USEDLittleFS%</span> | Total: <span id="totalSD">%TOTALLittleFS%</span></p>
-    <p>
+    <div class="header">
+      <h1>Benestinkt</h1>
+      <button onclick="logoutButton()" class="action-button">
+        <i class="fas fa-sign-out-alt"></i>
+      </button>
+    </div>
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3><i class="fas fa-sd-card"></i> SD Card</h3>
+        <p>Free: <span id="freeSD">%FREESD%</span></p>
+        <p>Used: <span id="usedSD">%USEDSD%</span></p>
+        <p>Total: <span id="totalSD">%TOTALSD%</span></p>
+      </div>
+      <div class="stat-card">
+        <h3><i class="fas fa-memory"></i> LittleFS</h3>
+        <p>Free: <span id="freeLittleFS">%FREELittleFS%</span></p>
+        <p>Used: <span id="usedLittleFS">%USEDLittleFS%</span></p>
+        <p>Total: <span id="totalLittleFS">%TOTALLittleFS%</span></p>
+      </div>
+    </div>
+
     <form id="save" enctype="multipart/form-data" method="post">
       <input type="hidden" id="actualFolder" name="actualFolder" value="/">
       <input type="hidden" id="actualFS" name="actualFS" value="LittleFS">
     </form>
-    <button onclick="rebootButton()">Reboot</button>
-    <button onclick="WifiConfig()">Usr/Pass</button>
-    <button onclick="serialCmd()">SerialCmd</button>
-    <button onclick="listFilesButton('/', 'SD', true)">SD Files</button>
-    <button onclick="listFilesButton('/', 'LittleFS', true)">LittleFS</button>
 
-    </p>
-    <p id="detailsheader"></p>
-    <p id="details"></p>
-    <p id="updetailsheader"></p>
-    <p id="updetails"></p>
-    <div id="drop-area" class="drop-area" ondrop="drop(event, document.getElementById('actualFolder').value)">
-        <p style="text-align: center;">Drag and drop files here</p>
+    <div class="button-group">
+      <button onclick="rebootButton()"><i class="fas fa-redo"></i> Reboot</button>
+      <button onclick="WifiConfig()"><i class="fas fa-wifi"></i> Usr/Pass</button>
+      <button onclick="serialCmd()"><i class="fas fa-terminal"></i> SerialCmd</button>
+      <button onclick="listFilesButton('/', 'SD', true)"><i class="fas fa-sd-card"></i> SD Files</button>
+      <button onclick="listFilesButton('/', 'LittleFS', true)"><i class="fas fa-memory"></i> LittleFS</button>
     </div>
-    <p id="status"></p>
-  </div>
 
-<script src="script.js"></script>
+    <div class="file-explorer">
+      <div id="detailsheader"></div>
+      <div id="details"></div>
+    </div>
+
+    <div id="updetailsheader"></div>
+    <div id="updetails"></div>
+    
+    <div id="drop-area" class="drop-area">
+      <i class="fas fa-cloud-upload-alt"></i>
+      <p>Drag and drop files here</p>
+    </div>
+    
+    <div id="status"></div>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
 )rawliteral";
@@ -762,19 +937,43 @@ const char logout_html[] PROGMEM = R"rawliteral(
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
       padding: 20px;
+      background: #1a1a1a;
       color: #ad007b;
-      background-color: #202124;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .logout-card {
+      background: #2d2d2d;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
     }
 
     h3 {
       margin: 0;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 20px;
+    }
+
+    a {
+      color: #ad007b;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    a:hover {
+      color: #ff0095;
     }
   </style>
 </head>
 <body>
-  <h3><a href="/">Log Back In</a></h3>
+  <div class="logout-card">
+    <h3>Logged Out</h3>
+    <a href="/">Log Back In</a>
+  </div>
 </body>
 </html>
 )rawliteral";

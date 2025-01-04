@@ -125,3 +125,14 @@ void touchHeatMap(struct TouchPoint t) {
 }
 
 #endif
+
+void smoothTransition(bool direction) {  // true = left-to-right, false = right-to-left
+    int steps = 10;
+    int stepWidth = tftWidth / steps;
+    
+    for(int i = 0; i < steps; i++) {
+        int x = direction ? (i * stepWidth) : (tftWidth - (i * stepWidth));
+        tft.fillRect(x, 0, stepWidth, tftHeight, bruceConfig.bgColor);
+        delay(10);
+    }
+}
