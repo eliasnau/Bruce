@@ -183,7 +183,7 @@ void begin_tft(){
 *********************************************************************/
 void boot_screen() {
   tft.setTextColor(bruceConfig.priColor, TFT_BLACK);
-  tft.setTextSize(FM);
+  tft.setTextSize(FG);
   tft.drawPixel(0,0,TFT_BLACK);
   tft.drawCentreString("Benestinkt", tftWidth / 2, 10, SMOOTH_FONT);
   tft.setTextSize(FP);
@@ -192,7 +192,7 @@ void boot_screen() {
   tft.drawCentreString("PREDATORY FIRMWARE", tftWidth / 2, tftHeight+2, SMOOTH_FONT);
   
   // Add your signature - small text in bottom right
-  tft.setTextSize(1);  // Smaller text size
+  tft.setTextSize(2);  // Smaller text size
   tft.drawString("by Elias", tftWidth - 50, tftHeight - 12, SMOOTH_FONT);  // Positioned in bottom right corner
 }
 
