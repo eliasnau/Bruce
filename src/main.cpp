@@ -183,7 +183,7 @@ void begin_tft(){
 *********************************************************************/
 void boot_screen() {
   tft.setTextColor(bruceConfig.priColor, TFT_BLACK);
-  tft.setTextSize(FG);
+  tft.setTextSize(FM);
   tft.drawPixel(0,0,TFT_BLACK);
   tft.drawCentreString("Benestinkt", tftWidth / 2, 10, SMOOTH_FONT);
   tft.setTextSize(FP);
@@ -192,7 +192,7 @@ void boot_screen() {
   tft.drawCentreString("PREDATORY FIRMWARE", tftWidth / 2, tftHeight+2, SMOOTH_FONT);
   
   // Add your signature - small text in bottom right
-  tft.setTextSize(2);  // Smaller text size
+  tft.setTextSize(1);  // Smaller text siz
   tft.drawString("by Elias", tftWidth - 50, tftHeight - 12, SMOOTH_FONT);  // Positioned in bottom right corner
 }
 
@@ -208,11 +208,29 @@ void boot_screen_anim() {
   bool drawn=false;
   if(SD.exists("/boot.jpg"))            boot_img = 1;
   else if(LittleFS.exists("/boot.jpg")) boot_img = 2;
-  // GIFs are not working at all, need study
-  //else if(SD.exists("/boot.gif"))       boot_img = 3;
-  //else if(LittleFS.exists("/boot.gif")) boot_img = 4;
+
+  // Add loading spinner variables
+  int16_t spinnerX = tftWidth / 2;
+  int16_t spinnerY = tftHeight / 2 + 20;
+  int16_t spinnerRadius = 15;
+  float angle = 0;
+  
   // Start image loop
-  while(millis()<i+7000) { // boot image lasts for 5 secs
+  while(millis()<i+7000) {
+    // Draw spinning animation
+    if(!drawn) {
+      // Clear previous position
+      tft.fillCircle(spinnerX, spinnerY, spinnerRadius + 2, bruceConfig.bgColor);
+      
+      // Calculate spinner position
+      int16_t x = spinnerX + cos(angle) * spinnerRadius;
+      int16_t y = spinnerY + sin(angle) * spinnerRadius;
+      
+      // Draw spinner dot
+      tft.fillCircle(x, y, 3, bruceConfig.priColor);
+      angle += 0.3; // Adjust speed of rotation
+    }
+
     if((millis()-i>2000) && !drawn) {
       tft.fillRect(0,45,tftWidth,tftHeight-45,bruceConfig.bgColor);
       if(boot_img > 0 && !drawn) {
@@ -239,6 +257,8 @@ void boot_screen_anim() {
       delay(10);
       return;
     }
+    
+    delay(20); // Small delay for smooth animation
   }
 
   // Clear splashscreen
