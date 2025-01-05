@@ -209,60 +209,68 @@ void boot_screen_anim() {
   if(SD.exists("/boot.jpg"))            boot_img = 1;
   else if(LittleFS.exists("/boot.jpg")) boot_img = 2;
 
-  // Add loading spinner variables
-  int16_t spinnerX = tftWidth / 2;
-  int16_t spinnerY = tftHeight / 2 + 20;
-  int16_t spinnerRadius = 15;
-  float angle = 0;
+  // Add progress bar variables
+  int16_t barX = tftWidth / 4;
+  int16_t barY = tftHeight / 2 + 20;
+  int16_t barWidth = tftWidth / 2;
+  int16_t barHeight = 4;
+  int16_t progress = 0;
+  int16_t lastWidth = 0;
+  
+  // Quick progress bar animation (0-2000ms)
+  while(millis() < i+2000) {
+    // Calculate new progress
+    progress = ((millis() - i) * 100) / 2000;
+    if(progress > 100) progress = 100;
+    
+    // Calculate new width
+    int fillWidth = (progress * barWidth) / 100;
+    
+    // Only redraw if width changed
+    if(fillWidth != lastWidth) {
+      // Only draw the new part
+      if(lastWidth == 0) {
+        // First run - draw the outline
+        tft.drawRect(barX - 2, barY - 2, barWidth + 4, barHeight + 4, bruceConfig.priColor);
+      }
+      
+      // Fill only the new section
+      tft.fillRect(barX + lastWidth, barY, fillWidth - lastWidth, barHeight, bruceConfig.priColor);
+      lastWidth = fillWidth;
+    }
+    
+    delay(10); // Smoother animation with less delay
+  }
+  
+  // Clear progress bar with single operation
+  tft.fillRect(barX - 2, barY - 2, barWidth + 4, barHeight + 4, bruceConfig.bgColor);
   
   // Start image loop
   while(millis()<i+7000) {
-    // Draw spinning animation
-    if(!drawn) {
-      // Clear previous position
-      tft.fillCircle(spinnerX, spinnerY, spinnerRadius + 2, bruceConfig.bgColor);
-      
-      // Calculate spinner position
-      int16_t x = spinnerX + cos(angle) * spinnerRadius;
-      int16_t y = spinnerY + sin(angle) * spinnerRadius;
-      
-      // Draw spinner dot
-      tft.fillCircle(x, y, 3, bruceConfig.priColor);
-      angle += 0.3; // Adjust speed of rotation
-    }
-
     if((millis()-i>2000) && !drawn) {
-      tft.fillRect(0,45,tftWidth,tftHeight-45,bruceConfig.bgColor);
-      if(boot_img > 0 && !drawn) {
+      if(boot_img > 0) {
         tft.fillScreen(bruceConfig.bgColor);
         if(boot_img==1)       { showJpeg(SD,"/boot.jpg",0,0,true);       Serial.println("Image from SD"); }
         else if (boot_img==2) { showJpeg(LittleFS,"/boot.jpg",0,0,true); Serial.println("Image from LittleFS"); }
-        // GIFs are not working at all, need study
-        //else if (boot_img==3) { showGIF(SD,"/boot.gif");        Serial.println("Image from SD"); }
-        //else if (boot_img==4) { showGIF(LittleFS,"/boot.gif");  Serial.println("Image from LittleFS"); }
+      } else {
+        tft.fillRect(0,45,tftWidth,tftHeight-45,bruceConfig.bgColor);
       }
       drawn=true;
     }
- #if !defined(LITE_VERSION)   
+    
     if(!boot_img && (millis()-i>2200) && (millis()-i)<2700) tft.drawRect(2*tftWidth/3,tftHeight/2,2,2,bruceConfig.priColor);
     if(!boot_img && (millis()-i>2700) && (millis()-i)<2900) tft.fillRect(0,45,tftWidth,tftHeight-45,bruceConfig.bgColor);
     if(!boot_img && (millis()-i>2900) && (millis()-i)<3400) tft.drawXBitmap(2*tftWidth/3 - 30 ,5+tftHeight/2,bruce_small_bits, bruce_small_width, bruce_small_height,bruceConfig.bgColor,bruceConfig.priColor);
     if(!boot_img && (millis()-i>3400) && (millis()-i)<3600) tft.fillRect(0,0,tftWidth,tftHeight,bruceConfig.bgColor);
     if(!boot_img && (millis()-i>3600)) tft.drawXBitmap((tftWidth-238)/2,(tftHeight-133)/2,bits, bits_width, bits_height,bruceConfig.bgColor,bruceConfig.priColor);
-  #endif
-    if(check(AnyKeyPress))  // If any key or M5 key is pressed, it'll jump the boot screen
-    {
-      tft.fillScreen(TFT_BLACK);
+    
+    if(check(AnyKeyPress)) {
       tft.fillScreen(TFT_BLACK);
       delay(10);
       return;
     }
-    
-    delay(20); // Small delay for smooth animation
   }
 
-  // Clear splashscreen
-  tft.fillScreen(TFT_BLACK);
   tft.fillScreen(TFT_BLACK);
 }
 
